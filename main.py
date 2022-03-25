@@ -22,14 +22,13 @@ def on_open(ws):
     print("Opened connection sending CONNECT_CONTROLLER")
     ws.send("{\"eventType\" : \"CONNECT_CONTROLLER\",  " +
             "\"data\" : " +
-            "{ \"sessionName\" : \"DubbleFF\", " +
+            "{ \"sessionName\" : \"KFC\", " +
             "\"sessionVersion\" : 1, " +
             "\"discardParseErrors\" : false,  " +
             "\"discardEventTypeErrors\" : false, " +
             "\"discardMalformedDataErrors\" : false, " +
             "\"discardInvalidStateErrors\" : false}" +
             "}")
-
 
 if __name__ == "__main__":
     websocket.enableTrace(True)
