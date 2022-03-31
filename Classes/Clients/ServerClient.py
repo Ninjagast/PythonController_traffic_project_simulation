@@ -40,7 +40,7 @@ class ServerClient:
         print("Opened connection sending CONNECT_CONTROLLER")
         data = "{\"eventType\" : \"CONNECT_CONTROLLER\",  " \
                "\"data\" : " \
-               "{ \"sessionName\" : \"DubbleFF\", " \
+               "{ \"sessionName\" : \"KFC\", " \
                "\"sessionVersion\" : 1, " \
                "\"discardParseErrors\" : false,  " \
                "\"discardEventTypeErrors\" : false, " \
@@ -59,13 +59,455 @@ class ServerClient:
         elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BRIDGE_STATE.name:
             print('henkie')
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
-            data = DataSerializer()
-            data.eventType = EventTypes.SET_AUTOMOBILE_ROUTE_STATE.name
-            data.data = {
-                "routeId": 5,
-                "state": "ORANGE"
-            }
-            self.send_request(data.serialize())
+            self.allGreen()
+            # pass
 
     def send_request(self, data):
         self.ws.send(data)
+
+    def allGreen(self):
+        time.sleep(10)
+        data = DataSerializer()
+        data.eventType = EventTypes.SET_AUTOMOBILE_ROUTE_STATE.name
+        # CARS:
+        data.data = {
+            "routeId": 1,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 2,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 3,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 10,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 11,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 12,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 7,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 8,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 9,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 5,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 4,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 15,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        #     END CARS
+
+        # START CYCLIST
+        data.eventType = EventTypes.SET_CYCLIST_ROUTE_STATE.name
+
+        data.data = {
+            "routeId": 24,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 23,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 22,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 21,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        # END CYCLIST
+        # START PEDESTRIAN
+        data.eventType = EventTypes.SET_PEDESTRIAN_ROUTE_STATE.name
+        data.data = {
+            "routeId": 31,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 32,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 33,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 34,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 35,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 36,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 37,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 38,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        # END PEDESTRIAN
+
+        self.allOrange()
+
+    def allOrange(self):
+        time.sleep(10)
+        data = DataSerializer()
+        data.eventType = EventTypes.SET_AUTOMOBILE_ROUTE_STATE.name
+        # CARS:
+        data.data = {
+            "routeId": 1,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 2,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 3,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 10,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 11,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 12,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 7,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 8,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 9,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 5,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 4,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 15,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+
+        #     END CARS
+
+        # START CYCLIST
+        data.eventType = EventTypes.SET_CYCLIST_ROUTE_STATE.name
+
+        data.data = {
+            "routeId": 24,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 23,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 22,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 21,
+            "state": "ORANGE"
+        }
+        self.send_request(data.serialize())
+        # END CYCLIST
+        # START PEDESTRIAN
+        data.eventType = EventTypes.SET_PEDESTRIAN_ROUTE_STATE.name
+        data.data = {
+            "routeId": 31,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 32,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 33,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 34,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 35,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 36,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 37,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 38,
+            "state": "BLINKING"
+        }
+        self.send_request(data.serialize())
+        # END PEDESTRIAN
+
+        self.lastTest()
+
+
+    def lastTest(self):
+        time.sleep(10)
+        data = DataSerializer()
+        data.eventType = EventTypes.SET_AUTOMOBILE_ROUTE_STATE.name
+        # CARS:
+        data.data = {
+            "routeId": 1,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 2,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 3,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 10,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 11,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 12,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 7,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 8,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 9,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 5,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 4,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 15,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        #     END CARS
+
+        # START CYCLIST
+        data.eventType = EventTypes.SET_CYCLIST_ROUTE_STATE.name
+
+        data.data = {
+            "routeId": 24,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 23,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 22,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 21,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        # END CYCLIST
+        # START PEDESTRIAN
+        data.eventType = EventTypes.SET_PEDESTRIAN_ROUTE_STATE.name
+        data.data = {
+            "routeId": 31,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 32,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+
+        data.data = {
+            "routeId": 33,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 34,
+            "state": "GREEN"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 35,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 36,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 37,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        data.data = {
+            "routeId": 38,
+            "state": "RED"
+        }
+        self.send_request(data.serialize())
+        # END PEDESTRIAN
+
