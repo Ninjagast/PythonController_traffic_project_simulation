@@ -1,4 +1,6 @@
 from Classes.TrafficLights import TrafficLights
+import time
+import threading
 
 
 class TrafficLightManager:
@@ -6,171 +8,72 @@ class TrafficLightManager:
         self.trafficLights = TrafficLights(ws)
         self.canPlayPattern = True
 
-    def onEntityEntersZone(self, routeId, state):
+    def onEntityEntersZone(self, routeId):
         if self.canChangeState(routeId):
-            self.canPlayPattern = False
-            self.trafficLights.setRouteState(routeId, state)
+            thread = threading.Thread(target=self.activateTrafficLights, args=([routeId],))
+            thread.start()
         else:
             self.trafficLightPattern()
 
+    def givenTraficLightsAreRed(self, idArray):
+        for id in idArray:
+            if self.trafficLights.getTrafficLight(id) != 'red':
+                return False
+        return True
+
     def canChangeState(self, routeId):
-        if routeId == 1 and (
-                self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(9) == 'red'):
+        if routeId == 1 and self.givenTraficLightsAreRed([5, 9]):
             return True
-        elif routeId == 2 and (
-                self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(9) == 'red'
-                and self.trafficLights.getTrafficLight(10) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-        ):
+        elif routeId == 2 and self.givenTraficLightsAreRed([5, 9, 10, 11, 12]):
             return True
-        elif routeId == 3 and (
-                self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(7) == 'red'
-                and self.trafficLights.getTrafficLight(8) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-                and self.trafficLights.getTrafficLight(15) == 'red'
-        ):
+        elif routeId == 3 and self.givenTraficLightsAreRed([5, 7, 8, 11, 12, 15]):
             return True
-        elif routeId == 4 and (
-                self.trafficLights.getTrafficLight(8) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-                and self.trafficLights.getTrafficLight(15) == 'red'
-        ):
+        elif routeId == 4 and self.givenTraficLightsAreRed([8, 12, 15]):
             return True
-        elif routeId == 5 and (
-                self.trafficLights.getTrafficLight(1) == 'red'
-                and self.trafficLights.getTrafficLight(2) == 'red'
-                and self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(8) == 'red'
-                and self.trafficLights.getTrafficLight(9) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-                and self.trafficLights.getTrafficLight(15) == 'red'
-        ):
+        elif routeId == 5 and self.givenTraficLightsAreRed([1, 2, 3, 8, 9, 11, 12, 15]):
             return True
-        elif routeId == 7 and (
-                self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(15) == 'red'
-        ):
+        elif routeId == 7 and self.givenTraficLightsAreRed([3, 11, 15]):
             return True
-        elif routeId == 8 and (
-                self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(4) == 'red'
-                and self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-        ):
+        elif routeId == 8 and self.givenTraficLightsAreRed([3, 4, 5, 11, 12]):
             return True
-        elif routeId == 9 and (
-                self.trafficLights.getTrafficLight(1) == 'red'
-                and self.trafficLights.getTrafficLight(2) == 'red'
-                and self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-                and self.trafficLights.getTrafficLight(12) == 'red'
-        ):
+        elif routeId == 9 and self.givenTraficLightsAreRed([1, 2, 5, 11, 12]):
             return True
-        elif routeId == 10 and (self.trafficLights.getTrafficLight(2) == 'red'):
+        elif routeId == 10 and self.givenTraficLightsAreRed([2]):
             return True
-        elif routeId == 11 and (
-                self.trafficLights.getTrafficLight(2) == 'red'
-                and self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(7) == 'red'
-                and self.trafficLights.getTrafficLight(8) == 'red'
-                and self.trafficLights.getTrafficLight(9) == 'red'
-                and self.trafficLights.getTrafficLight(15) == 'red'
-        ):
+        elif routeId == 11 and self.givenTraficLightsAreRed([2, 3, 5, 7, 8, 9, 15]):
             return True
-        elif routeId == 12 and (
-                self.trafficLights.getTrafficLight(2) == 'red'
-                and self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(4) == 'red'
-                and self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(8) == 'red'
-                and self.trafficLights.getTrafficLight(9) == 'red'
-        ):
+        elif routeId == 12 and self.givenTraficLightsAreRed([2, 3, 4, 5, 8, 9]):
             return True
-        elif routeId == 15 and (
-                self.trafficLights.getTrafficLight(3) == 'red'
-                and self.trafficLights.getTrafficLight(4) == 'red'
-                and self.trafficLights.getTrafficLight(5) == 'red'
-                and self.trafficLights.getTrafficLight(7) == 'red'
-                and self.trafficLights.getTrafficLight(11) == 'red'
-        ):
+        elif routeId == 15 and self.givenTraficLightsAreRed([3, 4, 5, 7, 11]):
             return True
         else:
             return False
 
+    def activateTrafficLights(self, idArray):
+        self.canPlayPattern = False
+        time.sleep(1)
+        for id in idArray:
+            self.trafficLights.setRouteState(id, 'GREEN')
+        time.sleep(5)
+        for id in idArray:
+            self.trafficLights.setRouteState(id, 'ORANGE')
+        time.sleep(5)
+        for id in idArray:
+            self.trafficLights.setRouteState(id, 'RED')
+        self.canPlayPattern = True
+
     def trafficLightPattern(self):
-        if self.canPlayPattern:
-            #         pattern 1:
-            self.trafficLights.setRouteState(1, "green")
-            self.trafficLights.setRouteState(2, "green")
-            self.trafficLights.setRouteState(7, "green")
-            self.trafficLights.setRouteState(8, "green")
-            time.sleep(5)
-            self.trafficLights.setRouteState(1, "orange")
-            self.trafficLights.setRouteState(2, "orange")
-            self.trafficLights.setRouteState(7, "orange")
-            self.trafficLights.setRouteState(8, "orange")
-            time.sleep(5)
-            self.trafficLights.setRouteState(1, "red")
-            self.trafficLights.setRouteState(2, "red")
-            self.trafficLights.setRouteState(7, "red")
-            self.trafficLights.setRouteState(8, "red")
-            time.sleep(5)
+        while not self.canPlayPattern:
+            time.sleep(1)
 
-            # pattern 2
-            self.trafficLights.setRouteState(3, "green")
-            self.trafficLights.setRouteState(4, "green")
-            self.trafficLights.setRouteState(9, "green")
-            self.trafficLights.setRouteState(10, "green")
-            time.sleep(5)
-            self.trafficLights.setRouteState(3, "orange")
-            self.trafficLights.setRouteState(4, "orange")
-            self.trafficLights.setRouteState(9, "orange")
-            self.trafficLights.setRouteState(10, "orange")
-            time.sleep(5)
-            self.trafficLights.setRouteState(3, "red")
-            self.trafficLights.setRouteState(4, "red")
-            self.trafficLights.setRouteState(9, "red")
-            self.trafficLights.setRouteState(10, "red")
+        self.canPlayPattern = False
+        # Pattern 1
+        self.activateTrafficLights([1, 2, 7, 8])
+        # Pattern 2
+        self.activateTrafficLights([3, 4, 9, 10])
+        # Pattern 3
+        self.activateTrafficLights([1, 7, 10, 12])
+        # Pattern 4
+        self.activateTrafficLights([4, 5, 10, 11])
 
-            # pattern 3
-            self.trafficLights.setRouteState(1, "green")
-            self.trafficLights.setRouteState(7, "green")
-            self.trafficLights.setRouteState(10, "green")
-            self.trafficLights.setRouteState(12, "green")
-            time.sleep(5)
-            self.trafficLights.setRouteState(1, "orange")
-            self.trafficLights.setRouteState(7, "orange")
-            self.trafficLights.setRouteState(10, "orange")
-            self.trafficLights.setRouteState(12, "orange")
-            time.sleep(5)
-            self.trafficLights.setRouteState(1, "red")
-            self.trafficLights.setRouteState(7, "red")
-            self.trafficLights.setRouteState(10, "red")
-            self.trafficLights.setRouteState(12, "red")
-
-            # pattern 4
-            self.trafficLights.setRouteState(4, "green")
-            self.trafficLights.setRouteState(5, "green")
-            self.trafficLights.setRouteState(10, "green")
-            self.trafficLights.setRouteState(11, "green")
-            time.sleep(5)
-            self.trafficLights.setRouteState(4, "orange")
-            self.trafficLights.setRouteState(5, "orange")
-            self.trafficLights.setRouteState(10, "orange")
-            self.trafficLights.setRouteState(11, "orange")
-            time.sleep(5)
-            self.trafficLights.setRouteState(4, "red")
-            self.trafficLights.setRouteState(5, "red")
-            self.trafficLights.setRouteState(10, "red")
-            self.trafficLights.setRouteState(11, "red")
-
-            self.canPlayPattern = True
+        self.canPlayPattern = True

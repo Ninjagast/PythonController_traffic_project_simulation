@@ -63,7 +63,7 @@ class ServerClient:
         elif dataSerializer.eventType == EventTypes.ENTITY_EXITED_ZONE.name:
             pass
         elif dataSerializer.eventType == EventTypes.ENTITY_ENTERED_ZONE.name:
-            self.traffic_light_manager.onEntityEntersZone(dataSerializer.data['routeId'], "GREEN")
+            self.traffic_light_manager.onEntityEntersZone(dataSerializer.data['routeId'])
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
             pass
 
