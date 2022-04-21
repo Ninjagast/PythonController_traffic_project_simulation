@@ -12,12 +12,12 @@ class LightManager:
         self.routeData = RoutesDataSerializer().getRouteData()
 
     def canChangeState(self, routeId: int) -> bool:
-        for id in self.routeData[routeId]:
+        for id in self.routeData.get(str(routeId)):
             if self.trafficLights.getTrafficLight(id) != 'red':
                 return False
         return True
 
-    def getServerRequest(self, routeId: int, state: str) -> ServerDataSerializer:
+    def getServerRequestJSON(self, routeId: int, state: str) -> str:
         data = ServerDataSerializer()
         if routeId in [21, 22, 23, 24]:
             data.eventType = EventTypes.SET_CYCLIST_ROUTE_STATE.name
@@ -29,7 +29,7 @@ class LightManager:
             "routeId": routeId,
             "state": state
         }
-        return data
+        return data.serialize()
 
     def activateTrafficLights(self, routeId: int, ws):
         sleepTime = 5
@@ -38,24 +38,24 @@ class LightManager:
         elif self.isPedestrianRoute(routeId):
             sleepTime = 10
 
-        request = self.getServerRequest(routeId, "GREEN")
+        request = self.getServerRequestJSON(routeId, "GREEN")
         ws.send(request)
 
         time.sleep(sleepTime)
         # turn traffic lights in idArray from green to orange to red
-        self.deactivateTrafficLights(idArray, sleepTime, ws)
+        self.deactivateTrafficLights(routeId, sleepTime, ws)
 
     def deactivateTrafficLights(self, routeId: int, sleepTime: int, ws):
         if self.isPedestrianRoute(routeId):
-            request = self.getServerRequest(routeId, "BLINKING")
+            request = self.getServerRequestJSON(routeId, "BLINKING")
         else:
-            request = self.getServerRequest(routeId, "ORANGE")
+            request = self.getServerRequestJSON(routeId, "ORANGE")
 
         ws.send(request)
 
         time.sleep(sleepTime)
 
-        request = self.getServerRequest(routeId, "RED")
+        request = self.getServerRequestJSON(routeId, "RED")
         ws.send(request)
 
     def isPedestrianRoute(self, routeId):

@@ -1,12 +1,9 @@
 import websocket
 import rel
-import time
-import json
 from threading import Thread
 from queue import Queue
 from Classes.Serializers.ServerDataSerializer import ServerDataSerializer
 from Classes.Enums.EventTypes import EventTypes
-from Classes.Managers.TrafficLightManager import TrafficLightManager
 from Classes.Managers.LightManager import LightManager
 
 
@@ -48,7 +45,7 @@ class ServerController:
         print("Opened connection sending CONNECT_CONTROLLER")
         data = "{\"eventType\" : \"CONNECT_CONTROLLER\",  " \
                "\"data\" : " \
-               "{ \"sessionName\" : \"iets\", " \
+               "{ \"sessionName\" : \"hunger\", " \
                "\"sessionVersion\" : 1, " \
                "\"discardParseErrors\" : false,  " \
                "\"discardEventTypeErrors\" : false, " \
@@ -86,7 +83,10 @@ class ServerController:
 
             threads = []
             traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
-            threads.append(Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws]).start())
+            thread = Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws])
+            threads.append(thread)
+            thread.start()
+
             queueLength = self.queue.qsize()
             prevRoutes = []
             prevRoutes.append(data)
@@ -95,20 +95,24 @@ class ServerController:
             while queueLength > i:
                 data = self.queue.get()
                 if data in prevRoutes:
+                    i += 1
+
                     continue
-                prevRoutes.append(data)
                 if traffic_light_manager.canChangeState(data):
                     traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
-                    threads.append(
-                        Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws]).start()
-                    )
+                    thread = Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws])
+                    threads.append(thread)
+                    thread.start()
+                    prevRoutes.append(data)
                 else:
+                    prevRoutes.append(data)
                     self.queue.put(data)
 
                 i += 1
 
             for thread in threads:
                 thread.join()
+
             traffic_light_manager.trafficLights.reset()
 
             print("GIVEN DATA:")

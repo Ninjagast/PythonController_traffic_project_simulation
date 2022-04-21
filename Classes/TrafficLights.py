@@ -22,16 +22,6 @@ class TrafficLights:
         if routeId in self.lights.keys():
             self.lights[routeId] = state
 
-            data = ServerDataSerializer()
-            if routeId in [21, 22, 23, 24]:
-                data.eventType = EventTypes.SET_CYCLIST_ROUTE_STATE.name
-            elif routeId in [31, 32, 33, 34, 35, 36, 37, 38]:
-                data.eventType = EventTypes.SET_PEDESTRIAN_ROUTE_STATE.name
-            else:
-                data.eventType = EventTypes.SET_AUTOMOBILE_ROUTE_STATE.name
-            data.data = {
-                "routeId": int(routeId),
-                "state": state
-            }
-            self.ws.send(data.serialize())
-
+    def reset(self):
+        for route in self.lights:
+            self.lights[route] = "red"
