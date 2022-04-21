@@ -20,3 +20,4 @@ class EventTypes(Enum):
     SESSION_START = 16
     ENTITY_ENTERED_ZONE = 17
     ENTITY_EXITED_ZONE = 18
+    SESSION_STOP = 19

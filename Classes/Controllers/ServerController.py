@@ -1,16 +1,21 @@
 import websocket
-import _thread
-import time
 import rel
+import time
 import json
+from threading import Thread
+from queue import Queue
 from Classes.Serializers.ServerDataSerializer import ServerDataSerializer
 from Classes.Enums.EventTypes import EventTypes
 from Classes.Managers.TrafficLightManager import TrafficLightManager
+from Classes.Managers.LightManager import LightManager
 
 
-class ServerClient:
+class ServerController:
     def __init__(self):
+        # the main looping thead which will be infinitely active
+        self.mainThread = Thread(target=self.main_loop)
         rel.safe_read()
+        self.queue = Queue()
         websocket.enableTrace(True)
 
         self.ws = websocket.WebSocketApp(
@@ -20,13 +25,12 @@ class ServerClient:
             on_error=self.on_error,
             on_close=self.on_close
         )
-
-        self.traffic_light_manager = TrafficLightManager(self.ws)
-
+        # start a new thread which handles the websocket
         self.ws.run_forever(dispatcher=rel)  # Set dispatcher to automatic reconnection
         rel.signal(2, rel.abort)  # Keyboard Interrupt
         rel.dispatch()
 
+    # starts a new thread when called
     def on_message(self, ws, message):
         print(f"You got mail: {message}")
 
@@ -63,11 +67,49 @@ class ServerClient:
         elif dataSerializer.eventType == EventTypes.ENTITY_EXITED_ZONE.name:
             pass
         elif dataSerializer.eventType == EventTypes.ENTITY_ENTERED_ZONE.name:
-            self.traffic_light_manager.onEntityEntersZone(dataSerializer.data['routeId'])
+            # adds the routeId to the queue which is accessible over the different threads
+            self.queue.put(dataSerializer.data['routeId'])
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
+            print("started main thread")
+            self.mainThread.start()
+        elif dataSerializer.eventType == EventTypes.SESSION_STOP.name:
             pass
 
     def send_request(self, data):
         self.ws.send(data)
 
+    def main_loop(self):
+        traffic_light_manager = LightManager(self.ws)
+        while True:
+            # waits until we have some data in the queue
+            data = self.queue.get()
 
+            threads = []
+            traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
+            threads.append(Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws]).start())
+            queueLength = self.queue.qsize()
+            prevRoutes = []
+            prevRoutes.append(data)
+            i = 0
+
+            while queueLength > i:
+                data = self.queue.get()
+                if data in prevRoutes:
+                    continue
+                prevRoutes.append(data)
+                if traffic_light_manager.canChangeState(data):
+                    traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
+                    threads.append(
+                        Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws]).start()
+                    )
+                else:
+                    self.queue.put(data)
+
+                i += 1
+
+            for thread in threads:
+                thread.join()
+            traffic_light_manager.trafficLights.reset()
+
+            print("GIVEN DATA:")
+            print(data)

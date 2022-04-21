@@ -2,7 +2,7 @@ from Classes.Enums.EventTypes import EventTypes
 import json
 
 
-class DataSerializer:
+class ServerDataSerializer:
     def __init__(self):
         self.eventType = None
         self.data = None
