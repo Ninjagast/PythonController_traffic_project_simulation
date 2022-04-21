@@ -7,7 +7,7 @@ class ServerDataSerializer:
         self.eventType = None
         self.data = None
 
-    def serialize(self):
+    def serialize(self) -> str:
         if self.data:
             return json.dumps({
                 "eventType": self.eventType,
@@ -18,7 +18,7 @@ class ServerDataSerializer:
                 "eventType": self.eventType
             })
 
-    def load(self, json_data):
+    def load(self, json_data : str):
         dict = json.loads(json_data)
         self.eventType = EventTypes[dict['eventType']].name
         if "data" in dict.keys():

@@ -10,7 +10,7 @@ from Classes.Managers.LightManager import LightManager
 class ServerController:
     def __init__(self):
         # the main looping thead which will be infinitely active
-        self.mainThread = Thread(target=self.main_loop)
+        self.main_thread = Thread(target=self.main_loop)
         rel.safe_read()
         self.queue = Queue()
         websocket.enableTrace(True)
@@ -39,7 +39,7 @@ class ServerController:
         print(error)
 
     def on_close(self, ws, close_status_code, close_msg):
-        print("### closed ###")
+        print("closed")
 
     def on_open(self, ws):
         print("Opened connection sending CONNECT_CONTROLLER")
@@ -61,59 +61,78 @@ class ServerController:
                 or dataSerializer.eventType == EventTypes.ERROR_MALFORMED_MESSAGE.name \
                 or dataSerializer.eventType == EventTypes.ERROR_INVALID_STATE.name:
             print(dataSerializer.eventType)
-        elif dataSerializer.eventType == EventTypes.ENTITY_EXITED_ZONE.name:
-            pass
+
         elif dataSerializer.eventType == EventTypes.ENTITY_ENTERED_ZONE.name:
             # adds the routeId to the queue which is accessible over the different threads
             self.queue.put(dataSerializer.data['routeId'])
+
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
             print("started main thread")
-            self.mainThread.start()
+            self.main_thread.start()
+
         elif dataSerializer.eventType == EventTypes.SESSION_STOP.name:
-            pass
+            for x in iter(self.queue.get, None):
+                pass
+            self.queue.put(-1)
+            self.main_thread.join()
+            print("main thread killed mother fucker")
 
     def send_request(self, data):
         self.ws.send(data)
 
     def main_loop(self):
-        traffic_light_manager = LightManager(self.ws)
+        # create a new light manager which is only accessible in the main thread
+        traffic_light_manager = LightManager(ws=self.ws)
         while True:
-            # waits until we have some data in the queue
-            data = self.queue.get()
+            # waits until we have some route_id in the queue
+            route_id = self.queue.get()
 
+            if route_id == -1:
+                # stop the main thread
+                return
+
+            # turn traffic light route_id on
             threads = []
-            traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
-            thread = Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws])
+            traffic_light_manager.traffic_lights.set_route_state(route_id=route_id, state="GREEN")
+            # create new thread for handling traffic light route_id
+            thread = Thread(target=traffic_light_manager.activate_traffic_lights, args=[route_id, self.ws])
+            # put reference thread in threads list
             threads.append(thread)
             thread.start()
 
-            queueLength = self.queue.qsize()
-            prevRoutes = []
-            prevRoutes.append(data)
+            queue_length = self.queue.qsize()
+            prev_routes = [route_id]
             i = 0
 
-            while queueLength > i:
-                data = self.queue.get()
-                if data in prevRoutes:
-                    i += 1
+            while queue_length > i:
+                route_id = self.queue.get()
 
+                if route_id == -1:
+                    # stop the main thread
+                    return
+
+                # if the route is already checked skip to next iteration
+                if route_id in prev_routes:
+                    i += 1
                     continue
-                if traffic_light_manager.canChangeState(data):
-                    traffic_light_manager.trafficLights.setRouteState(data, "GREEN")
-                    thread = Thread(target=traffic_light_manager.activateTrafficLights, args=[data, self.ws])
+
+                # if the route id's traffic light can be changed
+                if traffic_light_manager.can_change_state(route_id=route_id):
+                    traffic_light_manager.traffic_lights.set_route_state(route_id=route_id, state="GREEN")
+                    # create new thread for handling traffic light route_id
+                    thread = Thread(target=traffic_light_manager.activate_traffic_lights, args=[route_id, self.ws])
                     threads.append(thread)
                     thread.start()
-                    prevRoutes.append(data)
+                    prev_routes.append(route_id)
                 else:
-                    prevRoutes.append(data)
-                    self.queue.put(data)
+                    # else put route id's back into the queue
+                    prev_routes.append(route_id)
+                    self.queue.put(route_id)
 
                 i += 1
 
+            # end of while loop
             for thread in threads:
                 thread.join()
-
-            traffic_light_manager.trafficLights.reset()
-
-            print("GIVEN DATA:")
-            print(data)
+            # turn all traffic lights off
+            traffic_light_manager.traffic_lights.reset()

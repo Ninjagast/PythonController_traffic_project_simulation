@@ -13,14 +13,14 @@ class TrafficLights:
             for row in reader:
                 self.lights[int(row[0])] = row[1]
 
-    def getTrafficLight(self, routeId):
-        if routeId in self.lights.keys():
-            return self.lights[routeId]
-        raise NotImplementedError
+    def get_traffic_light(self, route_id: int) -> str:
+        if route_id in self.lights.keys():
+            return self.lights[route_id]
+        raise NotImplementedError(f"{route_id} does not exist")
 
-    def setRouteState(self, routeId, state):
-        if routeId in self.lights.keys():
-            self.lights[routeId] = state
+    def set_route_state(self, route_id : int, state: str):
+        if route_id in self.lights.keys():
+            self.lights[route_id] = state
 
     def reset(self):
         for route in self.lights:
