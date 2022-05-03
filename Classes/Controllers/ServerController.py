@@ -70,7 +70,7 @@ class ServerController:
                 if traffic_light_manager.can_change_state(route_id=route_id):
                     traffic_light_manager.traffic_lights.set_route_state(route_id=route_id, state="GREEN")
                     # create new thread for handling traffic light route_id
-                    thread = Thread(target=traffic_light_manager.activate_traffic_lights, args=[route_id, self.ws, self.stop_threads])
+                    thread = Thread(target=traffic_light_manager.activate_traffic_lights, args=[route_id, self.ws])
                     threads.append(thread)
                     thread.start()
                     prev_routes.append(route_id)
