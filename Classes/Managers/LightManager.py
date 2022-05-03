@@ -54,7 +54,6 @@ class LightManager:
 
         ws.send(request)
         time.sleep(sleep_time)
-
         request = self.get_server_request_JSON(route_id=route_id, state="RED")
         ws.send(request)
 
