@@ -33,18 +33,17 @@ class LightManager:
         return data.serialize()
 
     def activate_traffic_lights(self, route_id: int, ws):
-        sleep_time = 5
-        if self.is_bicycle_route(route_id=route_id):
-            sleep_time = 7
-        elif self.is_pedestrian_route(route_id=route_id):
-            sleep_time = 10
+        sleep_time = 8
+
+        if self.is_pedestrian_route(route_id=route_id):
+            sleep_time = 6
 
         request = self.get_server_request_JSON(route_id=route_id, state="GREEN")
         ws.send(request)
 
         time.sleep(sleep_time)
         # turn traffic lights in idArray from green to orange to red
-        self.deactivate_traffic_lights(route_id=route_id, sleep_time=sleep_time, ws=ws)
+        self.deactivate_traffic_lights(route_id=route_id, sleep_time=4, ws=ws)
 
     def deactivate_traffic_lights(self, route_id: int, sleep_time: int, ws):
         if self.is_pedestrian_route(route_id=route_id):
@@ -56,9 +55,7 @@ class LightManager:
         time.sleep(sleep_time)
         request = self.get_server_request_JSON(route_id=route_id, state="RED")
         ws.send(request)
+        time.sleep(2)  # minimum red light time is 2 seconds
 
     def is_pedestrian_route(self, route_id: int) -> bool:
         return route_id in [31, 32, 33, 34, 35, 36, 37, 38]
-
-    def is_bicycle_route(self, route_id: int) -> bool:
-        return route_id in [21, 22, 23, 24]
