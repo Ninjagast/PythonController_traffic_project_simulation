@@ -38,7 +38,6 @@ class ServerController:
             if self.stop_threads:
                 return
 
-
             # turn traffic light route_id on
             threads = []
             traffic_light_manager.traffic_lights.set_route_state(route_id=route_id, state="GREEN")
@@ -106,7 +105,7 @@ class ServerController:
         print("Opened connection sending CONNECT_CONTROLLER")
         data = "{\"eventType\" : \"CONNECT_CONTROLLER\",  " \
                "\"data\" : " \
-               "{ \"sessionName\" : \"hungy\", " \
+               "{ \"sessionName\" : \"session\", " \
                "\"sessionVersion\" : 1, " \
                "\"discardParseErrors\" : false,  " \
                "\"discardEventTypeErrors\" : false, " \
@@ -134,8 +133,8 @@ class ServerController:
             self.main_thread.start()
 
         elif dataSerializer.eventType == EventTypes.SESSION_STOP.name:
-            self.queue.put(-1)
             self.stop_threads = True
+            self.queue.put(-1)
             self.main_thread.join()
             with self.queue.mutex:
                 self.queue.queue.clear()
