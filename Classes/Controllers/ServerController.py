@@ -1,3 +1,5 @@
+import time
+
 import websocket
 import rel
 from threading import Thread
@@ -34,31 +36,60 @@ class ServerController:
         rel.signal(2, rel.abort)  # Keyboard Interrupt
         rel.dispatch()
 
-    def bridge_open(self, data):
-        boat_manager = BoatManager(self.ws)
-
-        boat_manager.setBoatLight()
-        boat_manager.requestBridgeRoadState()
-
-        if data == "BRIDGE_EMPTY":
-            boat_manager.set()
-        if data == "BARRIER_STATE_DOWN":
-            boat_manager.setBoatLight(41)
-            boat_manager.bridgeUp()
-        if data == "BRIDGE_STATE_UP":
-            boat_manager.boatLightOn(41)
-            boat_manager.requestBridgeWaterState()
-
     def boat_loop(self):
         boat_manager = BoatManager(self.ws)
 
         while True:
-            data = self.boat_queue.get()
-
-            boat_manager.setWarningLights(data)
-
+            route_id = self.boat_queue.get()
+            second_route_id = -1
             if self.stop_threads:
                 return
+
+            boat_manager.setWarningLights("ON")
+            boat_manager.requestBridgeRoadState()
+
+            while True:
+                request = self.commands_queue.get()
+
+                if self.stop_threads:
+                    return
+
+                if request == "BRIDGE_EMPTY":
+                    boat_manager.sethitTree("DOWN")
+                elif request == "BARRIER_STATE_DOWN":
+                    boat_manager.setBoatLight(route_id, "GREENRED")
+                    boat_manager.setBridge("UP")
+                elif request == "BRIDGE_STATE_UP":
+                    boat_manager.setBoatLight(route_id, "GREEN")
+                    boat_manager.requestBridgeWaterState()
+                elif request == "WATER_EMPTY":
+                    try:
+                        other_id = self.boat_queue.get_nowait()
+                        if second_route_id < 0:
+                            second_route_id = other_id
+                        if other_id == route_id:
+                            boat_manager.setBoatLight(second_route_id, "RED")
+                            time.sleep(8)
+                            boat_manager.setBoatLight(route_id, "GREEN")
+                        else:
+                            boat_manager.setBoatLight(route_id, "RED")
+                            time.sleep(8)
+                            boat_manager.setBoatLight(second_route_id, "GREEN")
+                        boat_manager.requestBridgeWaterState()
+                    except:
+                        if second_route_id > 0:
+                            boat_manager.setBoatLight(second_route_id, "RED")
+
+                        boat_manager.setBoatLight(route_id, "RED")
+                        boat_manager.setBridge("DOWN")
+                elif request == "BRIDGE_STATE_DOWN":
+                    boat_manager.sethitTree("UP")
+                elif request == "BARRIER_STATE_UP":
+                    boat_manager.setWarningLights("OFF")
+                    break
+                else:
+                    print(f"unknown request {request}")
+                    break
 
     def main_loop(self):
         # create a new light manager which is only accessible in the main thread
@@ -170,7 +201,7 @@ class ServerController:
             self.commands_queue.put(f"BARRIER_STATE_{dataSerializer.data['state']}")
 
         elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BRIDGE_STATE.name:
-            self.commands_queue.put([f"BRIDGE_STATE_{dataSerializer.data['state']}"])
+            self.commands_queue.put(f"BRIDGE_STATE_{dataSerializer.data['state']}")
 
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
             print("started main thread")

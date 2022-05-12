@@ -13,6 +13,6 @@ class BoatRoutes:
         with open('BoatLights.csv', mode='r') as csv_file:
             reader = csv.reader(csv_file)
             for row in reader:
-                self.boatRoutes.append(row[0])
+                self.boatRoutes.append(int(row[0]))
 
 
