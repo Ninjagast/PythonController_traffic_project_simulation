@@ -2,17 +2,23 @@ import websocket
 import rel
 from threading import Thread
 from queue import Queue
-from Classes.Serializers.ServerDataSerializer import ServerDataSerializer
+from DataClasses.ServerDataSerializer import ServerDataSerializer
 from Classes.Enums.EventTypes import EventTypes
 from Classes.Managers.LightManager import LightManager
+from Classes.Managers.BoatManager import BoatManager
+from DataClasses.BoatRoutes import BoatRoutes
 
 
 class ServerController:
     def __init__(self):
         # the main looping thead which will be infinitely active
+        self.boat_routes = BoatRoutes()
         self.main_thread = Thread(target=self.main_loop)
+        self.boat_thread = Thread(target=self.boat_loop)
         rel.safe_read()
         self.queue = Queue()
+        self.commands_queue = Queue()
+        self.boat_queue = Queue()
         self.stop_threads = False
         websocket.enableTrace(True)
 
@@ -27,6 +33,32 @@ class ServerController:
         self.ws.run_forever(dispatcher=rel)  # Set dispatcher to automatic reconnection
         rel.signal(2, rel.abort)  # Keyboard Interrupt
         rel.dispatch()
+
+    def bridge_open(self, data):
+        boat_manager = BoatManager(self.ws)
+
+        boat_manager.setBoatLight()
+        boat_manager.requestBridgeRoadState()
+
+        if data == "BRIDGE_EMPTY":
+            boat_manager.set()
+        if data == "BARRIER_STATE_DOWN":
+            boat_manager.setBoatLight(41)
+            boat_manager.bridgeUp()
+        if data == "BRIDGE_STATE_UP":
+            boat_manager.boatLightOn(41)
+            boat_manager.requestBridgeWaterState()
+
+    def boat_loop(self):
+        boat_manager = BoatManager(self.ws)
+
+        while True:
+            data = self.boat_queue.get()
+
+            boat_manager.setWarningLights(data)
+
+            if self.stop_threads:
+                return
 
     def main_loop(self):
         # create a new light manager which is only accessible in the main thread
@@ -124,18 +156,36 @@ class ServerController:
 
         elif dataSerializer.eventType == EventTypes.ENTITY_ENTERED_ZONE.name:
             # adds the routeId to the queue which is accessible over the different threads
-            self.queue.put(dataSerializer.data['routeId'])
+            if dataSerializer.data['routeId'] == self.boat_routes:
+                self.boat_queue.put(dataSerializer.data['routeId'])
+            else:
+                self.queue.put(dataSerializer.data['routeId'])
+        elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BRIDGE_ROAD_EMPTY.name:
+            self.commands_queue.put('BRIDGE_EMPTY')
+
+        elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BRIDGE_WATER_EMPTY.name:
+            self.commands_queue.put('WATER_EMPTY')
+
+        elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BARRIERS_STATE.name:
+            self.commands_queue.put(f"BARRIER_STATE_{dataSerializer.data['state']}")
+
+        elif dataSerializer.eventType == EventTypes.ACKNOWLEDGE_BRIDGE_STATE.name:
+            self.commands_queue.put([f"BRIDGE_STATE_{dataSerializer.data['state']}"])
 
         elif dataSerializer.eventType == EventTypes.SESSION_START.name:
             print("started main thread")
             self.stop_threads = False
             self.main_thread = Thread(target=self.main_loop)
+            self.boat_thread = Thread(target=self.boat_loop)
             self.main_thread.start()
+            self.boat_thread.start()
 
         elif dataSerializer.eventType == EventTypes.SESSION_STOP.name:
             self.stop_threads = True
             self.queue.put(-1)
+            self.boat_queue.put(-1)
             self.main_thread.join()
+            self.boat_thread.join()
             with self.queue.mutex:
                 self.queue.queue.clear()
             print("main thread killed")

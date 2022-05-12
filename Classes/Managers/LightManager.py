@@ -1,8 +1,8 @@
 from Classes.TrafficLights import TrafficLights
 import time
 import threading
-from Classes.Serializers.RoutesDataSerializer import RoutesDataSerializer
-from Classes.Serializers.ServerDataSerializer import ServerDataSerializer
+from DataClasses.RoutesDataSerializer import RoutesDataSerializer
+from DataClasses.ServerDataSerializer import ServerDataSerializer
 from Classes.Enums.EventTypes import EventTypes
 
 

@@ -1,5 +1,5 @@
 import csv
-from Classes.Serializers.ServerDataSerializer import ServerDataSerializer
+from DataClasses.ServerDataSerializer import ServerDataSerializer
 from Classes.Enums.EventTypes import EventTypes
 
 
